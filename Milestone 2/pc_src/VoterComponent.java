@@ -49,6 +49,12 @@ public class VoterComponent implements ComponentBase{
 				break;
 			}
 
+			case 21: {
+
+
+
+			}
+
 			case 23: {
 				kvResult.addPair("MsgID", "26");
 				kvResult.addPair("Description", "Acknowledgement (Server acknowledges that Client component is now connected to Server)");
