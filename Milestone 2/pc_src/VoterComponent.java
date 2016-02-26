@@ -17,6 +17,8 @@ public class VoterComponent implements ComponentBase{
 
 	private final int pw = 5441;
 
+	public static VoteInstance voteInstance;
+
 	//Constructor
 	public VoterComponent(){
 			
@@ -51,8 +53,28 @@ public class VoterComponent implements ComponentBase{
 
 			case 21: {
 
+				int passcode = Integer.parseInt(kvList.getValue("Passcode"));
 
+				if(doAuthentication(passcode)){
 
+					kvResult.addPair("MsgID", "26");
+					kvResult.addPair("Description", "Acknowledgement (Server acknowledges that VoteInstance was created with name: " + kvList.getValue("Name"));
+					kvResult.addPair("AckMsgID", "23");
+					kvResult.addPair("YesNo", "Yes");
+					kvResult.addPair("Name", "VoteInstance");
+
+					voteInstance = new VoteInstance(kvList.getValue("Name"));
+				}
+				else{
+
+					kvResult.addPair("MsgID", "26");
+					kvResult.addPair("Description", "Acknowledgement (Server acknowledges that VoteInstance was attempted to be made, but authentication failed.");
+					kvResult.addPair("AckMsgID", "23");
+					kvResult.addPair("YesNo", "No");
+					kvResult.addPair("Name", "VoteInstance");
+				}
+
+				break;
 			}
 
 			case 23: {

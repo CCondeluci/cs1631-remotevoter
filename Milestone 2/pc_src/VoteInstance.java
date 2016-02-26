@@ -95,12 +95,56 @@ class TallyTable {
 
 class VoterTable {
 
+	//Never need to report back any information regarding the voters, 
+	//only need to prevent duplicates. No mapping required.
+	public static ArrayList<String> phoneNumbers;
+	public static ArrayList<String> emailAddresses;
+
+	public VoterTable(){
+
+		this.phoneNumbers = new ArrayList<String>();
+		this.emailAddresses = new ArrayList<String>();
+	}
+
+	//add phone number to table
+	public void addPhoneNumber(String phoneNumber){
+
+		this.phoneNumbers.add(phoneNumber);
+	}
+
+	//add email address to table
+	public void addEmail(String emailAddress){
+
+		this.emailAddresses.add(emailAddress);
+	}
+
 }
 
 public class VoteInstance {
 
 	public static String voteName;
-	public static ArrayList<Integer> candidateList;
+	public static TallyTable tallyTable;
+	public static VoterTable voterTable;
+
+	public VoteInstance(String sessionName){
+
+		this.voteName = sessionName;
+		this.voterTable = new VoterTable();
+	}
+
+	public void initTallyTable(String msgCandidateList){
+
+		String[] splitCands = msgCandidateList.split(";");
+
+		ArrayList<Integer> temp = new ArrayList<Integer>();
+
+		for(String curr : splitCands){
+
+			temp.add(Integer.valueOf(curr));
+		}
+
+		this.tallyTable = new TallyTable(temp);
+	}
 
 	//Main to test table classes
 	public static void main(String args[]){
