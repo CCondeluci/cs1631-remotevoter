@@ -100,24 +100,21 @@ public class VoterComponent implements ComponentBase{
 			//Vote casted, formated into a KeyValue pair by InterfaceServer
 			case 701: {
 
+				String tempPhone = kvList.getValue("VoterPhoneNo");
+
+				if(voteInstance.voterTable.checkPhones(tempPhone)){
+
+					kvResult.addPair("MsgID", "711");
+					kvResult.addPair("Description", "Acknowledge Vote: Duplicate");
+					kvResult.addPair("AckMsgID", "701");
+					kvResult.addPair("Status", "1");
+					break;
+				}
+
 				if(voteInstance.tallyTable.updateTally(Integer.valueOf(kvList.getValue("CandidateID")))){
-
-					String tempPhone = kvList.getValue("VoterPhoneNo");
-					String tempEmail = kvList.getValue("VoterEmail");
-
-					if(voteInstance.voterTable.checkPhones(tempPhone) || voteInstance.voterTable.checkEmails(tempEmail)){
-						kvResult.addPair("MsgID", "711");
-						kvResult.addPair("Description", "Acknowledge Vote: Duplicate");
-						kvResult.addPair("AckMsgID", "701");
-						kvResult.addPair("Status", "1");
-						break;
-					}
 
 					if(!tempPhone.equals(null))
 						voteInstance.voterTable.addPhoneNumber(tempPhone);
-					if(!tempEmail.equals(null))
-						voteInstance.voterTable.addEmail(tempEmail);
-
 
 					kvResult.addPair("MsgID", "711");
 					kvResult.addPair("Description", "Acknowledge Vote: Valid");

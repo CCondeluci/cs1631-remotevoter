@@ -101,13 +101,14 @@ class VoterTable {
 
 	//Never need to report back any information regarding the voters, 
 	//only need to prevent duplicates. No mapping required.
+	//We will just store emails as "phone numbers", they will work in 
+	//the exact same way and attempting to restrict to both a text
+	//message and email is complicated for a rudimentary voting system.
 	public static ArrayList<String> phoneNumbers;
-	public static ArrayList<String> emailAddresses;
 
 	public VoterTable(){
 
 		this.phoneNumbers = new ArrayList<String>();
-		this.emailAddresses = new ArrayList<String>();
 	}
 
 	//add phone number to table
@@ -116,20 +117,9 @@ class VoterTable {
 		this.phoneNumbers.add(phoneNumber);
 	}
 
-	//add email address to table
-	public void addEmail(String emailAddress){
-
-		this.emailAddresses.add(emailAddress);
-	}
-
 	public boolean checkPhones(String phoneNumber){
 
 		return phoneNumbers.contains(phoneNumber);
-	}
-
-	public boolean checkEmails(String emailAddress){
-
-		return emailAddresses.contains(emailAddress);
 	}
 
 }
