@@ -12,6 +12,7 @@ interface ComponentBase is described in InterfaceServer.java.
 */
 
 import java.io.*;
+import java.util.*;
 
 public class VoterComponent implements ComponentBase{
 
@@ -45,12 +46,14 @@ public class VoterComponent implements ComponentBase{
 
 		switch (MsgID) {
 
+			//PrjRemote connected (custom message)
 			case 11: {
 				kvResult.addPair("MsgID", "12");
 				kvResult.addPair("Description", "PrjRemote Connected. Will act as client.");
 				break;
 			}
 
+			//Initialize a voting session
 			case 21: {
 
 				int passcode = Integer.parseInt(kvList.getValue("Passcode"));
@@ -77,6 +80,7 @@ public class VoterComponent implements ComponentBase{
 				break;
 			}
 
+			//Connection of a client component (AdminClient, future client components that extend that interface, etc...)
 			case 23: {
 				kvResult.addPair("MsgID", "26");
 				kvResult.addPair("Description", "Acknowledgement (Server acknowledges that Client component is now connected to Server)");
@@ -93,15 +97,18 @@ public class VoterComponent implements ComponentBase{
 				break;
 			}
 
+			//Vote casted, formated into a KeyValue pair by InterfaceServer
 			case 701: {
 
-				if(voteInstance.tallyTable.updateTally(kvList.getValue("CandidateID"))){
+				if(voteInstance.tallyTable.updateTally(Integer.valueOf(kvList.getValue("CandidateID")))){
 
 					String tempPhone = kvList.getValue("VoterPhoneNo");
 					String tempEmail = kvList.getValue("VoterEmail");
 
 					if(voteInstance.voterTable.checkPhones(tempPhone) || voteInstance.voterTable.checkEmails(tempEmail)){
 						kvResult.addPair("MsgID", "711");
+						kvResult.addPair("Description", "Acknowledge Vote: Duplicate");
+						kvResult.addPair("AckMsgID", "701");
 						kvResult.addPair("Status", "1");
 						break;
 					}
@@ -109,22 +116,61 @@ public class VoterComponent implements ComponentBase{
 					if(!tempPhone.equals(null))
 						voteInstance.voterTable.addPhoneNumber(tempPhone);
 					if(!tempEmail.equals(null))
-						voteInstance.voterTable.addEmailAddress(tempEmail)
+						voteInstance.voterTable.addEmail(tempEmail);
 
 
 					kvResult.addPair("MsgID", "711");
+					kvResult.addPair("Description", "Acknowledge Vote: Valid");
+					kvResult.addPair("AckMsgID", "701");
 					kvResult.addPair("Status", "3");
 
 				}
 				else {
 
 					kvResult.addPair("MsgID", "711");
+					kvResult.addPair("Description", "Acknowledge Vote: Invalid");
+					kvResult.addPair("AckMsgID", "701");
 					kvResult.addPair("Status", "2");
 				}
 
 				break;
 			}
 
+			//Request voting report
+			case 702: {
+
+				int passcode = Integer.parseInt(kvList.getValue("Passcode"));
+
+				if(doAuthentication(passcode)){
+
+					kvResult.addPair("MsgID", "712");
+					kvResult.addPair("Description", "Acknowledge RequestReport: Success");
+					kvResult.addPair("AckMsgID", "702");
+					kvResult.addPair("YesNo", "Yes");
+
+					ArrayList<Integer[]> temp = voteInstance.tallyTable.getTopScorers(Integer.valueOf(kvList.getValue("N")));
+
+					String report = "";
+
+					for(Integer[] curr : temp){
+						report += curr[0] + "," + curr[1] + ";";
+					}
+
+					kvResult.addPair("RankedReport", report);
+				}
+				else{
+
+					kvResult.addPair("MsgID", "712");
+					kvResult.addPair("Description", "Acknowledge RequestReport: Failure");
+					kvResult.addPair("AckMsgID", "702");
+					kvResult.addPair("YesNo", "No");
+					kvResult.addPair("RankedReport", "AUTHENTICATION FAILURE");
+				}
+
+				break;
+			}
+
+			//Initialize the Tally Table
 			case 703: {
 
 				int passcode = Integer.parseInt(kvList.getValue("Passcode"));
