@@ -30,13 +30,17 @@ class TallyTable {
 	}
 
 	//Update the tally for a candidate by 1
-	public void updateTally(int candidate){
+	public boolean updateTally(int candidate){
 
 		if(candidateList.contains(candidate)){
 			int index = this.candidateList.indexOf(candidate);
 			int currCount = this.tallyCount.get(index);
 			this.tallyCount.set(index, currCount + 1);
+
+			return true;
 		}
+
+		return false;
 	}
 
 	//Get the current count for a given candidate
@@ -116,6 +120,16 @@ class VoterTable {
 	public void addEmail(String emailAddress){
 
 		this.emailAddresses.add(emailAddress);
+	}
+
+	public boolean checkPhones(String phoneNumber){
+
+		return phoneNumbers.contains(phoneNumber);
+	}
+
+	public boolean checkEmails(String emailAddress){
+
+		return emailAddresses.contains(emailAddress);
 	}
 
 }

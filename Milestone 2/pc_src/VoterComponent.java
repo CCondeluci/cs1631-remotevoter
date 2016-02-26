@@ -59,7 +59,7 @@ public class VoterComponent implements ComponentBase{
 
 					kvResult.addPair("MsgID", "26");
 					kvResult.addPair("Description", "Acknowledgement (Server acknowledges that VoteInstance was created with name: " + kvList.getValue("Name"));
-					kvResult.addPair("AckMsgID", "23");
+					kvResult.addPair("AckMsgID", "21");
 					kvResult.addPair("YesNo", "Yes");
 					kvResult.addPair("Name", "VoteInstance");
 
@@ -69,7 +69,7 @@ public class VoterComponent implements ComponentBase{
 
 					kvResult.addPair("MsgID", "26");
 					kvResult.addPair("Description", "Acknowledgement (Server acknowledges that VoteInstance was attempted to be made, but authentication failed.");
-					kvResult.addPair("AckMsgID", "23");
+					kvResult.addPair("AckMsgID", "21");
 					kvResult.addPair("YesNo", "No");
 					kvResult.addPair("Name", "VoteInstance");
 				}
@@ -90,6 +90,64 @@ public class VoterComponent implements ComponentBase{
 					kvResult.addPair("YesNo", "No");
 
 				kvResult.addPair("Name", "Client Application");
+				break;
+			}
+
+			case 701: {
+
+				if(voteInstance.tallyTable.updateTally(kvList.getValue("CandidateID"))){
+
+					String tempPhone = kvList.getValue("VoterPhoneNo");
+					String tempEmail = kvList.getValue("VoterEmail");
+
+					if(voteInstance.voterTable.checkPhones(tempPhone) || voteInstance.voterTable.checkEmails(tempEmail)){
+						kvResult.addPair("MsgID", "711");
+						kvResult.addPair("Status", "1");
+						break;
+					}
+
+					if(!tempPhone.equals(null))
+						voteInstance.voterTable.addPhoneNumber(tempPhone);
+					if(!tempEmail.equals(null))
+						voteInstance.voterTable.addEmailAddress(tempEmail)
+
+
+					kvResult.addPair("MsgID", "711");
+					kvResult.addPair("Status", "3");
+
+				}
+				else {
+
+					kvResult.addPair("MsgID", "711");
+					kvResult.addPair("Status", "2");
+				}
+
+				break;
+			}
+
+			case 703: {
+
+				int passcode = Integer.parseInt(kvList.getValue("Passcode"));
+
+				if(doAuthentication(passcode)){
+
+					kvResult.addPair("MsgID", "26");
+					kvResult.addPair("Description", "Acknowledgement (Server acknowledges that TallyTable was created)");
+					kvResult.addPair("AckMsgID", "703");
+					kvResult.addPair("YesNo", "Yes");
+					kvResult.addPair("Name", "Initialize TallyTable: Success");
+
+					voteInstance.initTallyTable(kvList.getValue("CandidateList"));
+				}
+				else{
+
+					kvResult.addPair("MsgID", "26");
+					kvResult.addPair("Description", "Acknowledgement (Server acknowledges that TallyTable was attempted to be made, but authentication failed.");
+					kvResult.addPair("AckMsgID", "703");
+					kvResult.addPair("YesNo", "No");
+					kvResult.addPair("Name", "Initialize TallyTable: Failure");
+				}
+
 				break;
 			}
 
