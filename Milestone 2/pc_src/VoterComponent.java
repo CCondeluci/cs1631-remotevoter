@@ -2,12 +2,8 @@
 Modified by Carmen Condeluci for CS1631
 2-18-16
 
-
-A Simple Example--Authentication Component.
-To Create a Component which works with the InterfaceServer,
-the interface ComponentBase is required to be implemented.
-
-interface ComponentBase is described in InterfaceServer.java.
+Handles all relevant messages being recieved by the server
+and responding appropriately.
 
 */
 
@@ -17,12 +13,16 @@ import java.util.*;
 public class VoterComponent implements ComponentBase{
 
 	private final int pw = 5441;
+	
+	public static int nameFlag = 0;
+	public static int tallyFlag = 0;
 
 	public static VoteInstance voteInstance;
 
 	//Constructor
 	public VoterComponent(){
-			
+		nameFlag = 0;
+		tallyFlag = 0;
 	}
 
 	/* just a trivial example */
@@ -67,6 +67,7 @@ public class VoterComponent implements ComponentBase{
 					kvResult.addPair("Name", "VoteInstance");
 
 					voteInstance = new VoteInstance(kvList.getValue("Name"));
+					nameFlag = 1; 
 				}
 				else{
 
@@ -99,6 +100,15 @@ public class VoterComponent implements ComponentBase{
 
 			//Vote casted, formated into a KeyValue pair by InterfaceServer
 			case 701: {
+
+				if(nameFlag == 0 || tallyFlag == 0){
+					kvResult.addPair("MsgID", "711");
+					kvResult.addPair("Description", "Acknowledge Vote: Invalid");
+					kvResult.addPair("AckMsgID", "701");
+					kvResult.addPair("Status", "2");
+					break;
+				}
+
 
 				String tempPhone = kvList.getValue("VoterPhoneNo");
 
@@ -170,6 +180,15 @@ public class VoterComponent implements ComponentBase{
 			//Initialize the Tally Table
 			case 703: {
 
+				if(nameFlag == 0){
+					kvResult.addPair("MsgID", "26");
+					kvResult.addPair("Description", "Acknowledgement (Server acknowledges that TallyTable was attempted to be made, but authentication failed.");
+					kvResult.addPair("AckMsgID", "703");
+					kvResult.addPair("YesNo", "No");
+					kvResult.addPair("Name", "Initialize TallyTable: Failure");
+					break;
+				}
+
 				int passcode = Integer.parseInt(kvList.getValue("Passcode"));
 
 				if(doAuthentication(passcode)){
@@ -181,6 +200,7 @@ public class VoterComponent implements ComponentBase{
 					kvResult.addPair("Name", "Initialize TallyTable: Success");
 
 					voteInstance.initTallyTable(kvList.getValue("CandidateList"));
+					tallyFlag = 1;
 				}
 				else{
 

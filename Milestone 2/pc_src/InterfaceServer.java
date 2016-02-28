@@ -178,6 +178,49 @@ class MsgDecoder {
 
 }
 
+/*
+Class stringDecoder:
+Takes a string and reconstructs it to 
+a Key Value List.
+
+same as a msgDecoder except no inputstream
+*/
+
+class StringDecoder {
+
+	private final String delimiter="$$$";
+
+	public KeyValueList getMsg(String input) throws IOException{
+		String strMsg = input;
+
+		//System.out.println(strMsg);
+
+		if (strMsg == null) 
+			return null;
+
+		strMsg = strMsg.substring(1, strMsg.length()-1);
+
+		KeyValueList kvList = new KeyValueList(); 
+		StringTokenizer st = new StringTokenizer(strMsg , delimiter);
+
+		while (st.hasMoreTokens()) {
+			String subject = st.nextToken();
+			String data = st.nextToken();
+			//System.out.println(subject + ": " + data);
+			kvList.addPair(subject, data);
+		}
+
+		//prjRemote doesn't send message IDs, so we'll have to add it manually.
+		//we'll use 11 to signify a PrjRemote connection.
+		if(kvList.getValue("MsgID") == null){
+			kvList.addPair("MsgID", "11");
+		}
+
+		return kvList;
+	}
+
+}
+
 
 /* 
 interface ComponentBase:
@@ -203,15 +246,38 @@ public class InterfaceServer
 		/*
 		You need to create your component here
 		*/
-
 		VoterComponent compMy = new VoterComponent();
+
+		//Set up mail handler
+		MailHandler incomingMail = new MailHandler();
+		incomingMail.setupMail();
+		ArrayList<String> mailMsgs = new ArrayList<String>();
+
 		Socket client = server.accept();
 		try{
 			MsgDecoder mDecoder= new MsgDecoder(client.getInputStream());
 			MsgEncoder mEncoder= new MsgEncoder();
+			StringDecoder sDecoder = new StringDecoder();
 			KeyValueList kvInput,kvOutput;
 
 			do{
+				//messages from emails
+				mailMsgs = incomingMail.getEmailVotes(compMy.voteInstance.voteName);
+				if(!mailMsgs.isEmpty()){
+
+					for(String currMsg : mailMsgs){
+
+						kvInput = sDecoder.getMsg(currMsg);
+						System.out.println("Incoming Message:\n");
+						System.out.println(kvInput);
+						KeyValueList kvResult = compMy.processMsg(kvInput);
+						System.out.println("Outgoing Message:\n");
+						System.out.println(kvResult);
+						mEncoder.sendMsg(kvResult, client.getOutputStream());
+					}
+				}
+
+				//messages from admin and remote
 				kvInput = mDecoder.getMsg();
 				if (kvInput != null) {
 					System.out.println("Incoming Message:\n");

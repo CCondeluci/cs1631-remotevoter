@@ -126,7 +126,7 @@ class VoterTable {
 
 public class VoteInstance {
 
-	public static String voteName;
+	public static String voteName = "INVALID_INSTANCE";
 	public static TallyTable tallyTable;
 	public static VoterTable voterTable;
 
